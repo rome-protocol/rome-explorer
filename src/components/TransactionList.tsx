@@ -3,19 +3,15 @@ import { Transaction } from '@/constants/transactions';
 import { Tabs } from '@/components/Tabs';
 import { useMinedTransactions } from '@/components/Transactions';
 import { useChainStore } from "@/store/chainStore";
+import { TxQueryCriteria } from '@/hooks/TxnQueryCriteria';
 
 
-
-const BOX_H = 400;
+const BOX_H = 600;
 
 type TransactionType = 'mined' | 'pending'
 
 interface TransactionHook {
-  numTransactions: number | null;
-  loadedTransactions: Transaction[];
-  loadNextTransactions: () => Promise<void>;
-  getDisplayTransactions?: (searchQuery: string) => Transaction[];
-  fetchTransactionfromAPI: () => Promise<Transaction[]>;
+  fetchTransactionsfromAPIWithCriteria: (criteria: TxQueryCriteria) => Promise<Transaction[]>;
 
 }
 
@@ -43,7 +39,7 @@ const TRANSACTION_TYPE_CONFIGS: Record<TransactionType, TransactionTypeConfig> =
 interface TransactionListProps {
   onSelect: (transaction: Transaction) => void;
   onTabChange?: (transactionType: TransactionType) => void;
-  showNativeTab?: boolean; // New prop to control Native tab visibility
+
 }
 
 // Internal component that gets remounted when activeTab changes
@@ -62,37 +58,32 @@ function TransactionListContent({
   const { chainId } = useChainStore();
 
   const {
-    numTransactions,
-    loadedTransactions,
-    loadNextTransactions,
-    getDisplayTransactions,
-    fetchTransactionfromAPI,
+    fetchTransactionsfromAPIWithCriteria,
 
   } = activeConfig.useHook();
 
   const [apiTransactions, setApiTransactions] = useState<Transaction[]>([]);
   function fetchData() {
-    if (fetchTransactionfromAPI) {
-      fetchTransactionfromAPI().then((txs) => {
+    console.log('Fetching transactions for chainId:', chainId);
+    if (fetchTransactionsfromAPIWithCriteria) {
+      const criteria: TxQueryCriteria = {
+        filter: {
+          chain_id: chainId,
+        },
+        parts: {
+          all: true,
+        },
+        identifier: { latest: true },
+        limit: {
+          limit: 25,
+        },
+        tx_type: { tx_type: 'all' },
+      };
+
+
+      fetchTransactionsfromAPIWithCriteria(criteria).then((txs) => {
         console.log('Fetched transactions from API (raw):', txs);
-        // Try to map each transaction to expected shape
-        const mappedTxs = Array.isArray(txs)
-          ? txs.map((tx: any) => {
-            const t = tx.Transaction ?? tx;
-            return {
-              hash: t.hash ?? t.txHash ?? t.id ?? '',
-              nonce: t.nonce ?? '',
-              blockNumber: t.blockNumber ?? t.block_num ?? '',
-              from: t.from ?? t.sender ?? '',
-              to: t.to ?? t.recipient ?? '',
-              value: t.value ?? t.amount ?? '',
-              gas: t.gas ?? '',
-              input: t.input ?? '',
-              // Add more mappings as needed for Transaction type
-            };
-          })
-          : [];
-        setApiTransactions(mappedTxs);
+        setApiTransactions(txs);
       });
     }
   }
@@ -104,13 +95,7 @@ function TransactionListContent({
     fetchData();
   }, [chainId]);
 
-  useEffect(() => {
-    console.log('apiTransactions:', apiTransactions);
-    if (apiTransactions.length > 0) {
-      console.log('First transaction:', apiTransactions[0]);
-      console.log('Transaction keys:', Object.keys(apiTransactions[0]));
-    }
-  }, [apiTransactions]);
+
 
   const handleScroll = useCallback(
     (e: Event) => {
@@ -142,16 +127,14 @@ function TransactionListContent({
   );
 
 
-
   // Show empty state only if both loadedTransactions and apiTransactions are empty
-  if (loadedTransactions.length === 0 && apiTransactions.length === 0) {
+  if (apiTransactions.length === 0) {
     return (
       <div className="text-center py-4 text-gray-500">
         {activeConfig.emptyStateMessage}
       </div>
     );
   }
-
 
 
   return (
@@ -162,21 +145,39 @@ function TransactionListContent({
             <th className="p-2 border sticky top-0 bg-gray-100">Hash</th>
             <th className="p-2 border sticky top-0 bg-gray-100">Nonce</th>
             <th className="p-2 border sticky top-0 bg-gray-100">Block Number</th>
+            <th className="p-2 border sticky top-0 bg-gray-100">Type</th>
             <th className="p-2 border sticky top-0 bg-gray-100">From</th>
             <th className="p-2 border sticky top-0 bg-gray-100">To</th>
+            <th className="p-2 border sticky top-0 bg-gray-100">Block Hash</th>
             <th className="p-2 border sticky top-0 bg-gray-100">Value</th>
+            <th className="p-2 border sticky top-0 bg-gray-100">Gas</th>
+            <th className="p-2 border sticky top-0 bg-gray-100">Gas Price</th>
+
             {/* Add more columns as needed */}
           </tr>
         </thead>
         <tbody>
           {apiTransactions.length === 0 ? null : apiTransactions.map((tx) => (
             <tr key={tx.hash} className="border-b hover:bg-gray-50 cursor-pointer">
-              <td className="p-2 border">{tx.hash ?? ''}</td>
+              <td className="p-2 border">
+                {tx.hash ? (
+                  <a
+                    href={`/transaction/${tx.hash}`}
+                    className="text-blue-600 underline hover:text-blue-800"
+                  >
+                    {tx.hash}
+                  </a>
+                ) : ''}
+              </td>
               <td className="p-2 border">{tx.nonce ?? ''}</td>
               <td className="p-2 border">{tx.blockNumber ?? ''}</td>
+              <td className="p-2 border">{tx.transactionType ?? ''}</td>
               <td className="p-2 border">{tx.from ?? ''}</td>
               <td className="p-2 border">{tx.to ?? ''}</td>
+              <td className="p-2 border">{tx.blockHash ?? ''}</td>
               <td className="p-2 border">{tx.value ?? ''}</td>
+              <td className="p-2 border">{tx.gas ?? ''}</td>
+              <td className="p-2 border">{tx.gasPrice ?? ''}</td>
               {/* Add more cells for other fields */}
             </tr>
           ))}
@@ -189,39 +190,22 @@ function TransactionListContent({
 
 export function TransactionList({
   onSelect,
-  onTabChange,
-  showNativeTab = false, // Default to false for backward compatibility
+  onTabChange
 }: TransactionListProps) {
   const [activeTab, setActiveTab] = useState<TransactionType>('mined');
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Filter tab options based on showNativeTab prop
   const tabOptions: { label: string; value: TransactionType }[] = Object.entries(
     TRANSACTION_TYPE_CONFIGS
-  )
-    .filter(([key]) => showNativeTab || key !== 'native') // Only include native if showNativeTab is true
-    .map(([key, config]) => ({ label: config.label, value: key as TransactionType }));
+  ).map(([key, config]) => ({ label: config.label, value: key as TransactionType }));
 
   useEffect(() => {
     onTabChange?.(activeTab);
   }, [activeTab, onTabChange]);
 
-  // Reset activeTab if showNativeTab changes and current tab is no longer available
-  useEffect(() => {
-    if (!showNativeTab && activeTab === 'mined') {
-      setActiveTab('mined');
-    } else if (
-      showNativeTab &&
-      !tabOptions.find((tab) => tab.value === activeTab)
-    ) {
-      setActiveTab('mined');
-    }
-  }, [showNativeTab, activeTab, tabOptions]);
 
   const handleTabChange = (newTab: TransactionType) => {
     setActiveTab(newTab);
-    // Reset search and scroll state when switching tabs
-    //setSearchQuery('');
     onTabChange?.(newTab);
   };
 

@@ -8,7 +8,7 @@ import { Transaction } from '@/constants/transactions';
 type TabType = 'mined' | 'pending';
 
 
-export default function TokensPage() {
+export default function TransactionsPage() {
 
   const [currentTxn, setCurrentTxn] = useState<Transaction | null>(null);
 
@@ -24,20 +24,16 @@ export default function TokensPage() {
 
   return (
     <Layout>
-      <div className="w-xl flex flex-col mx-auto gap-6">
+      <div className="flex flex-col gap-6 w-full">
         {!currentTxn && (
-          <div className="flex flex-col items-center justify-center gap-4">
-            <div className="w-xl flex flex-col mx-auto border border-gray p-8 rounded-2xl text-black bg-white items-center justify-center gap-4">
-              <h1 className="text-base mb-4">Transactions</h1>
+          <div className="border border-gray p-8 rounded-2xl text-black bg-white flex flex-col gap-4 w-full">
+            <h1 className="text-base mb-4">Transactions</h1>
 
-              <TransactionList
-                onSelect={(txn) => setCurrentTxn(txn)}
-              />
-            </div>
+            <TransactionList onSelect={(txn) => setCurrentTxn(txn)} />
           </div>
         )}
-
       </div>
     </Layout>
+
   );
 }
