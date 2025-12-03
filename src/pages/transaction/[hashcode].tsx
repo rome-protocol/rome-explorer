@@ -1,13 +1,13 @@
 // pages/transaction/[hashcode].tsx
-import { useRouter } from 'next/router';
 import Layout from '@/components/Layout';
 import { TransactionDetails } from '@/components/TransactionDetails';
 import { useChainStore } from '@/store/chainStore';
+import { useRouter } from 'next/router';
 
 export default function TransactionHashPage() {
   const router = useRouter();
   const { hashcode } = router.query;
-  const { chainId } = useChainStore();
+  useChainStore();
   
 
   return (

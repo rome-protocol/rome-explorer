@@ -170,7 +170,7 @@ function TransactionListContent({
                 ) : ''}
               </td>
               <td className="p-2 border">{tx.nonce ?? ''}</td>
-              <td className="p-2 border">{tx.blockNumber ?? ''}</td>
+              <td className="p-2 border">{tx.blockNumber ? parseInt(tx.blockNumber, 16) : ''}</td>
               <td className="p-2 border">{tx.transactionType ?? ''}</td>
               <td className="p-2 border">{tx.from ?? ''}</td>
               <td className="p-2 border">{tx.to ?? ''}</td>

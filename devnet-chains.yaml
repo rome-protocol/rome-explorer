@@ -9,10 +9,10 @@
     multicall: "0xf4D036C657d55eE8C32CE8CE71C2e86C8cc2D210"
     erc20Factory: "0xE6d867787C4F9D3B6cc36105cF2FcBa0D35a4462"
 
-- name: "Subura"
-  chainId: "121213"
-  rpcUrl: "https://subura-i.devnet.romeprotocol.xyz/"
-  explorerUrl: "https://romescout-subura.devnet.romeprotocol.xyz/"
+- name: "Martius"
+  chainId: "121214"
+  rpcUrl: "https://martius-i.testnet.romeprotocol.xyz/"
+  explorerUrl: "https://romescout-martius-i.testnet.romeprotocol.xyz/"
   contracts:
     uniswapV2Factory: "0x35715cB98cC5847da5661DaA17Ec061f3659CE8F"
     uniswapV2Router: "0x815F2b3091040b721343a5d5AABFD1e98a8D05C4"
@@ -20,10 +20,11 @@
     multicall: "0x23795B97504B8282F6536ed1F89c1C359d788af4"
     erc20Factory: "0xc213DE6790D395131d9aA3fe4B1a8d78A364379E"
 
-- name: "Martius"
-  chainId: "121214"
-  rpcUrl: "https://martius-i.testnet.romeprotocol.xyz/"
-  explorerUrl: "https://romescout-martius-i.testnet.romeprotocol.xyz/"
+
+- name: "Subura"
+  chainId: "121213"
+  rpcUrl: "https://subura-i.devnet.romeprotocol.xyz/"
+  explorerUrl: "https://romescout-subura.devnet.romeprotocol.xyz/"
   contracts:
     uniswapV2Factory: "0x35715cB98cC5847da5661DaA17Ec061f3659CE8F"
     uniswapV2Router: "0x815F2b3091040b721343a5d5AABFD1e98a8D05C4"
