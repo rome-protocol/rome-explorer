@@ -6,7 +6,7 @@ import { L2_CHAINS } from "@/constants/chains";
 import { ChevronDownIcon, Bars3Icon } from "@heroicons/react/20/solid";
 import { MobileSidebar } from "@/components/MobileSidebar";
 import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
-import { SearchBar } from "./SearchBar";
+import { SearchWithResults } from "./SearchWithResults";
 /*
 import { WalletStatus } from "./WalletStatus";
 import { useUniWallet } from "@/hooks/useUniWallet";
@@ -37,8 +37,11 @@ export const Header = () => {
           />
         </div>
 
-        <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
-        {/* your results / logic using searchQuery */}
+<SearchWithResults
+  searchQuery={searchQuery}
+  setSearchQuery={setSearchQuery}
+  chainId={selectedChainId}
+/>        {/* your results / logic using searchQuery */}
 
         <div className="flex items-center gap-4">
 
