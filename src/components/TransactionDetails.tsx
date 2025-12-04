@@ -14,9 +14,9 @@ export function TransactionDetails({ hashcode }: { hashcode: string }) {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  console.log('TransactionDetails received hashcode:', hashcode);
-  console.log('ChainId received:', chainId);
-  console.log('Render transaction =', transaction);
+  //console.log('TransactionDetails received hashcode:', hashcode);
+  //console.log('ChainId received:', chainId);
+  //console.log('Render transaction =', transaction);
   const [atBottom, setAtBottom] = useState(false);
   
 
@@ -46,9 +46,9 @@ export function TransactionDetails({ hashcode }: { hashcode: string }) {
 
     fetchTransactionsfromAPIWithCriteria(criteria)
       .then((txs) => {
-        console.log('Fetched transactions from API (raw):', txs);
+        //console.log('Fetched transactions from API (raw):', txs);
         const tx = txs.length > 0 ? txs[0] : null;
-        console.log('Selected transaction:', tx);
+        //console.log('Selected transaction:', tx);
         setTransaction(tx);
       })
       .catch((e) => {

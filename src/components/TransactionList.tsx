@@ -64,7 +64,7 @@ function TransactionListContent({
 
   const [apiTransactions, setApiTransactions] = useState<Transaction[]>([]);
   function fetchData() {
-    console.log('Fetching transactions for chainId:', chainId);
+    //console.log('Fetching transactions for chainId:', chainId);
     if (fetchTransactionsfromAPIWithCriteria) {
       const criteria: TxQueryCriteria = {
         filter: {
@@ -82,7 +82,7 @@ function TransactionListContent({
 
 
       fetchTransactionsfromAPIWithCriteria(criteria).then((txs) => {
-        console.log('Fetched transactions from API (raw):', txs);
+       // console.log('Fetched transactions from API (raw):', txs);
         setApiTransactions(txs);
       });
     }

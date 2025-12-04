@@ -59,7 +59,7 @@ function BlockListContent({
 
   const [apiBlocks, setApiBlocks] = useState<Block[]>([]);
   function fetchData() {
-    console.log('Fetching blocks for chainId:', chainId);
+    //console.log('Fetching blocks for chainId:', chainId);
     if (fetchBlocksfromAPIWithCriteria) {
       const criteria: BlockQueryCriteria = {
         filter: {
@@ -73,7 +73,7 @@ function BlockListContent({
 
 
       fetchBlocksfromAPIWithCriteria(criteria).then((txs) => {
-        console.log('Fetched blocks from API (raw):', txs);
+        //console.log('Fetched blocks from API (raw):', txs);
         setApiBlocks(txs);
       });
     }

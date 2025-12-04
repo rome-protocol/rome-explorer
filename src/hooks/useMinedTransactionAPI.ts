@@ -11,7 +11,7 @@ export const useMinedTransactionAPI = () => {
 
   async function fetchTransactionfromAPI(urlParams: string): Promise<Transaction[]> {
     try {
-      console.log('Inside Transaction API Fetching transactions with URL params:', urlParams);
+      // console.log('Inside Transaction API Fetching transactions with URL params:', urlParams);
 
       let url = `${INDEXER_FULL_URL}/transactions?`;
       if (urlParams && urlParams.trim()) {
@@ -19,15 +19,15 @@ export const useMinedTransactionAPI = () => {
       } else {
         url += 'chain_id=121214&all=true&limit=25&latest=true';
       }
-      console.log('Fetching transactions from API with URL:', url);
+      // console.log('Fetching transactions from API with URL:', url);
       const res = await fetch(url);
       if (!res.ok) return [];
       const data = await res.json();
-      console.log('Fetched transactions from API:', data);
+      //console.log('Fetched transactions from API:', data);
       const transactions: Transaction[] = Array.isArray(data)
         ? data.map((item) => item.Transaction ?? item)
         : [];
-      console.log('Fetched transactions as txn array:', transactions);
+      //console.log('Fetched transactions as txn array:', transactions);
       return transactions;
     } catch {
       return [];
@@ -36,22 +36,22 @@ export const useMinedTransactionAPI = () => {
 
   async function fetchBlocksfromAPI(urlParams: string): Promise<any[]> {
     try {
-      console.log('Inside Block API Fetching blocks with URL params:', urlParams);
+      //console.log('Inside Block API Fetching blocks with URL params:', urlParams);
       let url = `${INDEXER_FULL_URL}/blocks?`;
       if (urlParams && urlParams.trim()) {
         url += urlParams;
       } else {
         url += 'chain_id=121214&all=true&limit=25&latest=true';
       }
-      console.log('Fetching blocks from API with URL:', url);
+      //console.log('Fetching blocks from API with URL:', url);
       const res = await fetch(url);
       if (!res.ok) return [];
       const data = await res.json();
-      console.log('Fetched blocks from API:', data);
+      //console.log('Fetched blocks from API:', data);
       const blocks: any[] = Array.isArray(data)
         ? data.map((item) => item.Block ?? item)
         : [];
-      console.log('Fetched blocks as block array:', blocks);
+      //console.log('Fetched blocks as block array:', blocks);
       return blocks;
     } catch {
       return [];

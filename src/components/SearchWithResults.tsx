@@ -70,7 +70,7 @@ export const SearchWithResults: React.FC<SearchWithResultsProps> = ({
       const txs = await fetchTransactionsfromAPIWithCriteria(criteria);
 
       // 🔥 ADDED LOG
-      console.log('TX result sample:', txs?.[0]);
+      //console.log('TX result sample:', txs?.[0]);
 
       return txs.map((tx: any): SearchResult => {
         const hash = tx.tx_hash ?? hashcode;
@@ -111,7 +111,7 @@ export const SearchWithResults: React.FC<SearchWithResultsProps> = ({
       const blocks: Block[] = await fetchBlocksfromAPIWithCriteria(criteria);
 
       // 🔥 ADDED LOG
-      console.log('Block result sample:', blocks?.[0]);
+      //console.log('Block result sample:', blocks?.[0]);
 
       return blocks.map((blk: any): SearchResult => {
         const hash = blk.block_hash;
