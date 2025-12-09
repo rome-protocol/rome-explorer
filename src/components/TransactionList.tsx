@@ -172,8 +172,26 @@ function TransactionListContent({
               <td className="p-2 border">{tx.nonce ?? ''}</td>
               <td className="p-2 border">{tx.blockNumber ? parseInt(tx.blockNumber, 16) : ''}</td>
               <td className="p-2 border">{tx.transactionType ?? ''}</td>
-              <td className="p-2 border">{tx.from ?? ''}</td>
-              <td className="p-2 border">{tx.to ?? ''}</td>
+              <td className="p-2 border">
+                {tx.from ? (
+                  <a
+                    href={`/balance/${tx.from}`}
+                    className="text-blue-600 underline hover:text-blue-800"
+                  >
+                    {tx.from}
+                  </a>
+                ) : ''}
+              </td>
+              <td className="p-2 border">
+                {tx.to ? (
+                  <a
+                    href={`/balance/${tx.to}`}
+                    className="text-blue-600 underline hover:text-blue-800"
+                  >
+                    {tx.to}
+                  </a>
+                ) : ''}
+              </td>
               <td className="p-2 border">{tx.blockHash ?? ''}</td>
               <td className="p-2 border">{tx.value ?? ''}</td>
               <td className="p-2 border">{tx.gas ?? ''}</td>

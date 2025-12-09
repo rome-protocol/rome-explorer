@@ -5,6 +5,10 @@ import { buildTxURLParams } from './TxURLParamBuilder';
 import { BlockQueryCriteria } from './BlockQueryCriteria';
 import { Block } from '@/constants/blocks';
 import { buildBlockURLParams } from './BlockURLParamBuilder';
+import { BalanceQueryCriteria } from './BalanceQueryCriteria';
+import { Balance } from '@/constants/balances';
+import { buildBalanceURLParams } from './BalanceURLParamBuilder';
+
 
 export const useMinedTransactionAPI = () => {
 
@@ -58,14 +62,49 @@ export const useMinedTransactionAPI = () => {
     }
   }
 
+  async function fetchBalancesfromAPI(urlParams: string): Promise<any[]> {
+    try {
+      //console.log('Inside Balance API Fetching balances with URL params:', urlParams);
+      let url = `${INDEXER_FULL_URL}/balances?`;
+      if (urlParams && urlParams.trim()) {
+        url += urlParams;
+      } else {
+        url += 'chain_id=121214&all=true&limit=25&latest=true';
+      }
+      console.log('Fetching balances from API with URL:', url);
+      const res = await fetch(url);
+      if (!res.ok) return [];
+      const data = await res.json();
+      //console.log('Fetched balances from API:', data);
+      const balances: any[] = Array.isArray(data)
+        ? data.map((item) => item.Balance ?? item)
+        : [];
+      //console.log('Fetched balances as balance array:', balances);
+      return balances;
+    } catch {
+      return [];
+    }
+  }
+
   /**
-   * Wrapped function to fetch blocks using BlockQueryCriteria.
-   * It builds URL params using BlockURLParamBuilder and calls fetchBlocksfromAPI.
-   */
+ * Wrapped function to fetch blocks using BlockQueryCriteria.
+ * It builds URL params using BlockURLParamBuilder and calls fetchBlocksfromAPI.
+ */
   async function fetchBlocksfromAPIWithCriteria(criteria: BlockQueryCriteria): Promise<Block[]> {
     // Assume BlockURLParamBuilder is imported and returns a string of URL params
     const urlParams = buildBlockURLParams(criteria);
     return await fetchBlocksfromAPI(urlParams);
+  }
+
+
+  /**
+   * Wrapped function to fetch blocks using BlockQueryCriteria.
+   * It builds URL params using BlockURLParamBuilder and calls fetchBlocksfromAPI.
+   */
+  async function fetchBalancesfromAPIWithCriteria(criteria: BalanceQueryCriteria): Promise<Balance[]> {
+    // Assume BlockURLParamBuilder is imported and returns a string of URL params
+    const urlParams = buildBalanceURLParams(criteria);
+    return await fetchBalancesfromAPI(urlParams);
   }
 
   /**
@@ -82,6 +121,7 @@ export const useMinedTransactionAPI = () => {
   return {
 
     fetchTransactionsfromAPIWithCriteria,
-    fetchBlocksfromAPIWithCriteria
+    fetchBlocksfromAPIWithCriteria,
+    fetchBalancesfromAPIWithCriteria
   };
 };

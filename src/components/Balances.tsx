@@ -1,11 +1,11 @@
 import { useMinedTransactionAPI } from "@/hooks/useMinedTransactionAPI";
 import { useChainStore } from "@/store/chainStore";
 
-export const useMinedBlocks = () => {
+export const useMinedBalances = () => {
     const { chainId } = useChainStore();
-    const {  fetchBlocksfromAPIWithCriteria } = useMinedTransactionAPI();
+    const {  fetchBalancesfromAPIWithCriteria } = useMinedTransactionAPI();
     return {
        
-        fetchBlocksfromAPIWithCriteria,
+        fetchBalancesfromAPIWithCriteria,
     };
 };
