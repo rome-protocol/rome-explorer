@@ -152,7 +152,24 @@ function BalanceListContent({
                 ) : ''}
               </td>
                
-                <td className="p-2 border">{blk.balance}</td>
+                <td className="p-2 border">
+  {(() => {
+    let raw = blk.balance;
+
+    // convert hex → decimal if needed
+    let value = raw && raw.startsWith("0x")
+      ? BigInt(raw)
+      : BigInt(raw || "0");
+
+    // convert from 18 decimals (RSOL)
+    const rsol = Number(value) / 1e18;
+
+    return rsol.toLocaleString(undefined, {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 8,
+    });
+  })()}
+</td>
               <td className="p-2 border">{blk.chain_id}</td>
             </tr>
           ))}
