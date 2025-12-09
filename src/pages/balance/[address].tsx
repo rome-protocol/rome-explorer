@@ -1,6 +1,6 @@
 // pages/balance/[hashcode].tsx
 import Layout from '@/components/Layout';
-import { BalanceDetails } from '@/components/BalanceDetails';
+import { BalanceDetails } from '@/components/BalanceComponent';
 import { useChainStore } from '@/store/chainStore';
 import { useRouter } from 'next/router';
 

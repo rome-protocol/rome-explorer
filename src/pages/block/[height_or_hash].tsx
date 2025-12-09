@@ -1,6 +1,6 @@
 // pages/block/[height_or_hash].tsx
 import Layout from '@/components/Layout';
-import { BlockDetails } from '@/components/BlockDetails';
+import { BlockDetails } from '@/components/BlockComponent';
 import { useChainStore } from '@/store/chainStore';
 import { useRouter } from 'next/router';
 import React from 'react';

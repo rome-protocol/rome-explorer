@@ -1,6 +1,6 @@
 // pages/transaction/[hashcode].tsx
 import Layout from '@/components/Layout';
-import { TransactionDetails } from '@/components/TransactionDetails';
+import { TransactionDetails } from '@/components/TransactionComponent';
 import { useChainStore } from '@/store/chainStore';
 import { useRouter } from 'next/router';
 

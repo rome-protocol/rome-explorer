@@ -1,5 +1,5 @@
 import Layout from '@/components/Layout';
-import { TransactionList } from '@/components/TransactionList';
+import { TransactionList } from '@/components/TransactionComponent';
 import React, { useEffect, useState } from 'react';
 import { useChainStore } from '@/store/chainStore';
 import { Transaction } from '@/constants/transactions';

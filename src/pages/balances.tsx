@@ -1,5 +1,5 @@
 import Layout from '@/components/Layout';
-import { BalanceList } from '@/components/BalanceList';
+import { BalanceList } from '@/components/BalanceComponent';
 import React, { useEffect, useState } from 'react';
 import { useChainStore } from '@/store/chainStore';
 import { Balance } from '@/constants/balances';
@@ -29,7 +29,7 @@ export default function BalancesPage() {
           <div className="border border-gray p-8 rounded-2xl text-black bg-white flex flex-col gap-4 w-full">
             <h1 className="text-base mb-4">Balances</h1>
 
-            <BalanceList onSelect={(blk) => setCurrentBlk(blk)} />
+            <BalanceList />
           </div>
         )}
       </div>

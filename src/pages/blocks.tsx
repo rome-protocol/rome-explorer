@@ -1,5 +1,5 @@
 import Layout from '@/components/Layout';
-import { BlockList } from '@/components/BlockList';
+import { BlockList } from '@/components/BlockComponent';
 import React, { useEffect, useState } from 'react';
 import { useChainStore } from '@/store/chainStore';
 import { Block } from '@/constants/blocks';

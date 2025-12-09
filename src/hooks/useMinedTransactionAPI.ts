@@ -12,79 +12,38 @@ import { buildBalanceURLParams } from './BalanceURLParamBuilder';
 
 export const useMinedTransactionAPI = () => {
 
-
-  async function fetchTransactionfromAPI(urlParams: string): Promise<Transaction[]> {
+  const fetchFromAPI = async <T>(type: string, urlParams: string, key: string): Promise<T[]> => {
     try {
-      // console.log('Inside Transaction API Fetching transactions with URL params:', urlParams);
-
-      let url = `${INDEXER_FULL_URL}/transactions?`;
+      let url = `${INDEXER_FULL_URL}/${type}?`;
       if (urlParams && urlParams.trim()) {
         url += urlParams;
       } else {
         url += 'chain_id=121214&all=true&limit=25&latest=true';
       }
-      // console.log('Fetching transactions from API with URL:', url);
+      // console.log(`Fetching ${type} from API with URL:`, url);
       const res = await fetch(url);
       if (!res.ok) return [];
       const data = await res.json();
-      //console.log('Fetched transactions from API:', data);
-      const transactions: Transaction[] = Array.isArray(data)
-        ? data.map((item) => item.Transaction ?? item)
+      // console.log(`Fetched ${type} from API:`, data);
+      const result: T[] = Array.isArray(data)
+        ? data.map((item) => item[key] ?? item)
         : [];
-      //console.log('Fetched transactions as txn array:', transactions);
-      return transactions;
+      // console.log(`Fetched ${type} as array:`, result);
+      return result;
     } catch {
       return [];
     }
-  }
+  };
 
-  async function fetchBlocksfromAPI(urlParams: string): Promise<any[]> {
-    try {
-      //console.log('Inside Block API Fetching blocks with URL params:', urlParams);
-      let url = `${INDEXER_FULL_URL}/blocks?`;
-      if (urlParams && urlParams.trim()) {
-        url += urlParams;
-      } else {
-        url += 'chain_id=121214&all=true&limit=25&latest=true';
-      }
-      //console.log('Fetching blocks from API with URL:', url);
-      const res = await fetch(url);
-      if (!res.ok) return [];
-      const data = await res.json();
-      //console.log('Fetched blocks from API:', data);
-      const blocks: any[] = Array.isArray(data)
-        ? data.map((item) => item.Block ?? item)
-        : [];
-      //console.log('Fetched blocks as block array:', blocks);
-      return blocks;
-    } catch {
-      return [];
-    }
-  }
+  const fetchTransactionsfromAPI = (urlParams: string) =>
+    fetchFromAPI<Transaction>('transactions', urlParams, 'Transaction');
 
-  async function fetchBalancesfromAPI(urlParams: string): Promise<any[]> {
-    try {
-      //console.log('Inside Balance API Fetching balances with URL params:', urlParams);
-      let url = `${INDEXER_FULL_URL}/balances?`;
-      if (urlParams && urlParams.trim()) {
-        url += urlParams;
-      } else {
-        url += 'chain_id=121214&all=true&limit=25&latest=true';
-      }
-      console.log('Fetching balances from API with URL:', url);
-      const res = await fetch(url);
-      if (!res.ok) return [];
-      const data = await res.json();
-      //console.log('Fetched balances from API:', data);
-      const balances: any[] = Array.isArray(data)
-        ? data.map((item) => item.Balance ?? item)
-        : [];
-      //console.log('Fetched balances as balance array:', balances);
-      return balances;
-    } catch {
-      return [];
-    }
-  }
+  const fetchBlocksfromAPI = (urlParams: string) =>
+    fetchFromAPI<Block>('blocks', urlParams, 'Block');
+
+  const fetchBalancesfromAPI = (urlParams: string) =>
+    fetchFromAPI<Balance>('balances', urlParams, 'Balance');
+
 
   /**
  * Wrapped function to fetch blocks using BlockQueryCriteria.
@@ -114,7 +73,7 @@ export const useMinedTransactionAPI = () => {
   async function fetchTransactionsfromAPIWithCriteria(criteria: TxQueryCriteria): Promise<Transaction[]> {
     // Assume TxURLParamBuilder is imported and returns a string of URL params
     const urlParams = buildTxURLParams(criteria);
-    return await fetchTransactionfromAPI(urlParams);
+    return await fetchTransactionsfromAPI(urlParams);
   }
 
 
