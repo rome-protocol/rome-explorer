@@ -3,10 +3,12 @@ import { SearchBar } from './SearchBar';
 
 import { TxQueryCriteria } from '@/hooks/TxnQueryCriteria';
 import { Block } from '@/constants/blocks';
+import { Balance } from '@/constants/balances';
 import { BlockQueryCriteria } from '@/hooks/BlockQueryCriteria';
+import { BalanceQueryCriteria } from '@/hooks/BalanceQueryCriteria';
 import { useMinedTransactionAPI } from '@/hooks/useMinedTransactionAPI';
 
-type SearchResultType = 'tx' | 'block';
+type SearchResultType = 'tx' | 'block'| 'balance';
 
 type SearchResult = {
   id: string;
@@ -29,7 +31,7 @@ export const SearchWithResults: React.FC<SearchWithResultsProps> = ({
 }) => {
   const {
     fetchTransactionsfromAPIWithCriteria,
-    fetchBlocksfromAPIWithCriteria,
+    fetchBlocksfromAPIWithCriteria, fetchBalancesfromAPIWithCriteria
   } = useMinedTransactionAPI();
 
   const [results, setResults] = useState<SearchResult[]>([]);
@@ -47,6 +49,9 @@ export const SearchWithResults: React.FC<SearchWithResultsProps> = ({
     if (q.startsWith('0x')) return true;
     return /^\d+$/.test(q);
   };
+
+  const isPossibleBalanceAddress = (q: string) =>
+    q.startsWith('0x') && q.length === 42;
 
   const short = (hash?: string) => {
     if (!hash) return '';
@@ -134,6 +139,41 @@ export const SearchWithResults: React.FC<SearchWithResultsProps> = ({
     }
   };
 
+  const searchBalances = async (
+    address: string,
+    chainIdParam: string, 
+  ): Promise<SearchResult[]> => {
+    const criteria: BalanceQueryCriteria = {
+      filter: { chain_id: chainIdParam },
+      identifier: { address },
+      limit: { limit: 25 },
+    };
+
+    try {
+      const balances: Balance[] = await fetchBalancesfromAPIWithCriteria(criteria);
+
+      // 🔥 ADDED LOG
+      //console.log('Balance result sample:', balances?.[0]);
+
+      return balances.map((bal: any): SearchResult => {
+        const addr = bal.address ?? address;
+
+        return {
+          id: `balance-${addr ?? ''}`,
+          label: short(addr),
+          description: bal.chain_id
+            ? `Balance · Chain ${bal.chain_id}`
+            : 'Balance',
+          type: 'balance',
+          url: addr ? `/balance/${addr}` : '#',
+        };
+      });
+    } catch (e) {
+      console.error('Error fetching balance:', e);
+      return [];
+    }
+  };
+
   // ---- SEARCH EFFECT ---- //
 
   useEffect(() => {
@@ -161,6 +201,10 @@ export const SearchWithResults: React.FC<SearchWithResultsProps> = ({
         if (isPossibleBlock(q)) {
           const blockResults = await searchBlocks(q, chainId);
           all.push(...blockResults);
+        }
+        if (isPossibleBalanceAddress(q)) {
+          const balanceResults = await searchBalances(q, chainId);
+          all.push(...balanceResults);
         }
 
         setResults(all);
