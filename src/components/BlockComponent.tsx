@@ -5,6 +5,10 @@ import { useChainStore } from "@/store/chainStore";
 import { BlockQueryCriteria } from '@/hooks/BlockQueryCriteria';
 import { useMinedTransactionAPI } from "@/hooks/useMinedTransactionAPI";
 
+   const solscanBase = process.env.NEXT_PUBLIC_SOLSCAN_URL;
+    const solscanCluster = process.env.NEXT_PUBLIC_SOLSCAN_CLUSTER;
+
+
 // Hook for fetching blocks
 export const useMinedBlocks = () => {
   const { fetchBlocksfromAPIWithCriteria } = useMinedTransactionAPI();
@@ -86,6 +90,7 @@ function BlockListContent({ activeTab, onSelect, searchQuery }: {
             <th className="p-2 border sticky top-0 bg-gray-100">Nonce</th>
             <th className="p-2 border sticky top-0 bg-gray-100">Base Fee Per Gas</th>
             <th className="p-2 border sticky top-0 bg-gray-100">Chain ID</th>
+            <th className="p-2 border sticky top-0 bg-gray-100">Solana Slot</th>
           </tr>
         </thead>
         <tbody>
@@ -117,6 +122,18 @@ function BlockListContent({ activeTab, onSelect, searchQuery }: {
               <td className="p-2 border">{blk.nonce}</td>
               <td className="p-2 border">{blk.base_fee_per_gas}</td>
               <td className="p-2 border">{blk.chain_id}</td>
+                <td className="p-2 border">
+                {blk.solana_slot ? (
+                  <a
+                  href={`${solscanBase}/block/${blk.solana_slot}?cluster=${solscanCluster}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-600 underline hover:text-blue-800"
+                  >
+                  {blk.solana_slot}
+                  </a>
+                ) : ''}
+                </td>
             </tr>
           ))}
         </tbody>
@@ -169,12 +186,42 @@ export function BlockDetails({ hashorHeight }: { hashorHeight: string }) {
   };
   return (
     <div className="flex flex-col gap-2">
-      {Object.entries(block).map(([key, value]) => (
-        <div key={key} className="flex justify-between gap-4 text-sm border-b border-gray-200 py-1">
-          <span className="font-semibold">{formatKey(key)}</span>
-          <span className="font-mono break-all text-right">{formatValue(key, value)}</span>
-        </div>
-      ))}
-    </div>
+  {Object.entries(block).map(([key, value]) => {
+    const isSolanaSlot = key === "solana_slot";
+
+    console.log("Key:", key, "Value:", value, "isSolanaSlot:", isSolanaSlot);
+
+ 
+    const solscanHref =
+      isSolanaSlot && value
+        ? `${solscanBase}/block/${value}?cluster=${solscanCluster}`
+        : null;
+
+        console.log("Solscan Href:", solscanHref);
+    return (
+      <div
+        key={key}
+        className="flex justify-between gap-4 text-sm border-b border-gray-200 py-1"
+      >
+        <span className="font-semibold">{formatKey(key)}</span>
+
+        <span className="font-mono break-all text-right">
+          {isSolanaSlot && solscanHref ? (
+            <a
+              href={solscanHref}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-600 hover:underline"
+            >
+              {formatValue(key, value)}
+            </a>
+          ) : (
+            formatValue(key, value)
+          )}
+        </span>
+      </div>
+    );
+  })}
+</div>
   );
 }
