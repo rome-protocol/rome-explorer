@@ -9,7 +9,9 @@ export interface TxFilter {
   status?: number;         // Transaction status (i16 in Rust, use number)
   recipient?: string;      // Recipient address (hex string)
   chain_id?: string;       // Chain ID to filter by
-  tx_type?: string;        // Transaction type as string
+  tx_type?: string;
+  block_no?: number;
+  block_hash?: string;       // Block hash to filter by
 }
 
 export interface Parts {

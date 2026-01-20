@@ -17,6 +17,7 @@ export interface Block {
   mix_hash: string;
   nonce: string;
   base_fee_per_gas?: string;
-  solana_slot?: number; // Optional field
+  solana_slot?: number;
+  tx_count: number;
 }
 

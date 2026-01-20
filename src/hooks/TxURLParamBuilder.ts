@@ -14,6 +14,8 @@ export function buildTxURLParams(criteria: TxQueryCriteria): string {
     if (criteria.filter.recipient) params.push(`recipient=${criteria.filter.recipient}`);
     if (typeof criteria.filter.chain_id) params.push(`chain_id=${criteria.filter.chain_id}`);
     if (criteria.filter.tx_type) params.push(`tx_type=${criteria.filter.tx_type}`);
+    if (typeof criteria.filter.block_no === 'number') params.push(`block_no=${criteria.filter.block_no}`);
+    if (criteria.filter.block_hash) params.push(`block_hash=${criteria.filter.block_hash}`);
 
     // Parts
     if (criteria.parts.all) params.push(`all=true`);

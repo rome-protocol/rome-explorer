@@ -1,9 +1,23 @@
 import Image from "next/image";
 import { Header } from "@/components/Header";
 import { Sidebar } from "@/components/Sidebar";
-import { Deposit } from "@/components/Deposit";
+import { HomePage } from "@/components/HomePage";
+import Layout from '@/components/Layout';
 
-export default function DepositPage() {
+
+export default function HomePageFunction() {
+   return (
+     <Layout>
+       <div className="flex flex-col gap-6 w-full">
+        <HomePage />
+       </div>
+     </Layout>
+ 
+   );
+ }
+
+
+  /*
   return (
     <div className="w-full h-screen px-8 pt-8 font-test">
       <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start container mx-auto relative h-full">
@@ -14,7 +28,7 @@ export default function DepositPage() {
             <Sidebar />
           </div>
 
-          <Deposit />
+          <HomePage />
         </div>
 
         <div className="absolute top-1/4 left-0 right-0 bottom-0 z-[-1]">
@@ -28,4 +42,4 @@ export default function DepositPage() {
       </main>
     </div>
   );
-} 
+  */

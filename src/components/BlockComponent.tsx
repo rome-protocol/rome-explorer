@@ -5,9 +5,8 @@ import { useChainStore } from "@/store/chainStore";
 import { BlockQueryCriteria } from '@/hooks/BlockQueryCriteria';
 import { useMinedTransactionAPI } from "@/hooks/useMinedTransactionAPI";
 
-   const solscanBase = process.env.NEXT_PUBLIC_SOLSCAN_URL;
-    const solscanCluster = process.env.NEXT_PUBLIC_SOLSCAN_CLUSTER;
-
+const solscanBase = process.env.NEXT_PUBLIC_SOLSCAN_URL;
+const solscanCluster = process.env.NEXT_PUBLIC_SOLSCAN_CLUSTER;
 
 // Hook for fetching blocks
 export const useMinedBlocks = () => {
@@ -23,25 +22,23 @@ export function BlockList({ onSelect, onTabChange }: {
   onTabChange?: (blockType: 'mined') => void;
 }) {
   const [activeTab, setActiveTab] = useState<'mined'>('mined');
-  const [searchQuery, setSearchQuery] = useState('');
-  const tabOptions = [{ label: 'Mined', value: 'mined' as const }];
+  const tabOptions = [{ label: 'All', value: 'mined' as const }];
   useEffect(() => { onTabChange?.(activeTab); }, [activeTab, onTabChange]);
   const handleTabChange = (newTab: 'mined') => { setActiveTab(newTab); onTabChange?.(newTab); };
   return (
     <div className="w-full flex flex-col gap-2" style={{ height: 650 }}>
       <Tabs tabs={tabOptions} activeTab={activeTab} onTabChange={handleTabChange} className="mb-4" />
-      <BlockListContent key={activeTab} activeTab={activeTab} onSelect={onSelect} searchQuery={searchQuery} />
+      <BlockListContent key={activeTab} activeTab={activeTab} onSelect={onSelect} />
     </div>
   );
 }
 
-function BlockListContent({ activeTab, onSelect, searchQuery }: {
+function BlockListContent({ activeTab, onSelect }: {
   activeTab: 'mined';
   onSelect: (block: Block) => void;
-  searchQuery: string;
 }) {
   const [atBottom, setAtBottom] = useState(false);
-  const activeConfig = { label: 'Mined', useHook: useMinedBlocks, emptyStateMessage: 'No blocks available for the selected chain' };
+  const activeConfig = { label: 'All', useHook: useMinedBlocks, emptyStateMessage: 'No blocks available for the selected chain' };
   const { chainId } = useChainStore();
   const { fetchBlocksfromAPIWithCriteria } = activeConfig.useHook();
   const [apiBlocks, setApiBlocks] = useState<Block[]>([]);
@@ -122,7 +119,7 @@ function BlockListContent({ activeTab, onSelect, searchQuery }: {
               <td className="p-2 border">{blk.nonce}</td>
               <td className="p-2 border">{blk.base_fee_per_gas}</td>
               <td className="p-2 border">{blk.chain_id}</td>
-                <td className="p-2 border">
+              <td className="p-2 border">
                 {blk.solana_slot ? (
                   <a
                   href={`${solscanBase}/block/${blk.solana_slot}?cluster=${solscanCluster}`}
@@ -133,7 +130,7 @@ function BlockListContent({ activeTab, onSelect, searchQuery }: {
                   {blk.solana_slot}
                   </a>
                 ) : ''}
-                </td>
+              </td>
             </tr>
           ))}
         </tbody>
