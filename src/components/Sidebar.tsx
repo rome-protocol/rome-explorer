@@ -52,6 +52,17 @@ export const Sidebar = () => {
           Balances
         </button>
       </Link>
+      <Link href="/codes">
+        <button
+          type="button"
+          className={clsx(
+            'w-full rounded-xl px-8 py-3 text-left cursor-pointer hover:shadow-menu',
+            pathname == '/codes' && 'shadow-menu'
+          )}
+        >
+          Codes
+        </button>
+      </Link>
 
       <div className="w-full bg-gray h-[1px]" />
 

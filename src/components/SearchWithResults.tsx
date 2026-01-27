@@ -4,11 +4,13 @@ import { SearchBar } from './SearchBar';
 import { TxQueryCriteria } from '@/hooks/TxnQueryCriteria';
 import { Block } from '@/constants/blocks';
 import { Balance } from '@/constants/balances';
+import { Code } from '@/constants/codes';
 import { BlockQueryCriteria } from '@/hooks/BlockQueryCriteria';
 import { BalanceQueryCriteria } from '@/hooks/BalanceQueryCriteria';
+import { CodeQueryCriteria } from '@/hooks/CodeQueryCriteria';
 import { useMinedTransactionAPI } from '@/hooks/useMinedTransactionAPI';
 
-type SearchResultType = 'tx' | 'block'| 'balance';
+type SearchResultType = 'tx' | 'block' | 'balance' | 'code';
 
 type SearchResult = {
   id: string;
@@ -31,7 +33,9 @@ export const SearchWithResults: React.FC<SearchWithResultsProps> = ({
 }) => {
   const {
     fetchTransactionsfromAPIWithCriteria,
-    fetchBlocksfromAPIWithCriteria, fetchBalancesfromAPIWithCriteria
+    fetchBlocksfromAPIWithCriteria,
+    fetchBalancesfromAPIWithCriteria,
+    fetchCodesfromAPIWithCriteria
   } = useMinedTransactionAPI();
 
   const [results, setResults] = useState<SearchResult[]>([]);
@@ -51,6 +55,9 @@ export const SearchWithResults: React.FC<SearchWithResultsProps> = ({
   };
 
   const isPossibleBalanceAddress = (q: string) =>
+    q.startsWith('0x') && q.length === 42;
+
+  const isPossibleCodeAddress = (q: string) =>
     q.startsWith('0x') && q.length === 42;
 
   const short = (hash?: string) => {
@@ -174,6 +181,38 @@ export const SearchWithResults: React.FC<SearchWithResultsProps> = ({
     }
   };
 
+  const searchCodes = async (
+    address: string,
+    chainIdParam: string,
+  ): Promise<SearchResult[]> => {
+    const criteria: CodeQueryCriteria = {
+      filter: { chain_id: chainIdParam },
+      identifier: { address },
+      limit: { limit: 25 },
+    };
+
+    try {
+      const codes: Code[] = await fetchCodesfromAPIWithCriteria(criteria);
+
+      return codes.map((code: any): SearchResult => {
+        const addr = code.address ?? address;
+
+        return {
+          id: `code-${addr ?? ''}`,
+          label: short(addr),
+          description: code.kind
+            ? `Code · ${code.kind} ${code.name ? `(${code.name})` : ''}`
+            : 'Code',
+          type: 'code',
+          url: addr ? `/code/${addr}` : '#',
+        };
+      });
+    } catch (e) {
+      console.error('Error fetching code:', e);
+      return [];
+    }
+  };
+
   // ---- SEARCH EFFECT ---- //
 
   useEffect(() => {
@@ -205,6 +244,10 @@ export const SearchWithResults: React.FC<SearchWithResultsProps> = ({
         if (isPossibleBalanceAddress(q)) {
           const balanceResults = await searchBalances(q, chainId);
           all.push(...balanceResults);
+        }
+        if (isPossibleCodeAddress(q)) {
+          const codeResults = await searchCodes(q, chainId);
+          all.push(...codeResults);
         }
 
         setResults(all);

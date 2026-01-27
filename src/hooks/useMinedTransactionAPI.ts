@@ -8,6 +8,9 @@ import { buildBlockURLParams } from './BlockURLParamBuilder';
 import { BalanceQueryCriteria } from './BalanceQueryCriteria';
 import { Balance } from '@/constants/balances';
 import { buildBalanceURLParams } from './BalanceURLParamBuilder';
+import { CodeQueryCriteria } from './CodeQueryCriteria';
+import { Code } from '@/constants/codes';
+import { buildCodeURLParams } from './CodeURLParamBuilder';
 
 const extractArray = (data: any): any[] => {
   if (Array.isArray(data)) return data;
@@ -74,6 +77,9 @@ export const useMinedTransactionAPI = () => {
   const fetchBalancesfromAPI = (urlParams: string) =>
     fetchFromAPI<Balance>('balances', urlParams, 'Balance');
 
+  const fetchCodesfromAPI = (urlParams: string) =>
+    fetchFromAPI<Code>('codes', urlParams, 'Code');
+
   async function fetchBlocksfromAPIWithCriteria(criteria: BlockQueryCriteria): Promise<Block[]> {
     const urlParams = buildBlockURLParams(criteria);
     return await fetchBlocksfromAPI(urlParams);
@@ -89,10 +95,16 @@ export const useMinedTransactionAPI = () => {
     return await fetchTransactionsfromAPI(urlParams);
   }
 
+  async function fetchCodesfromAPIWithCriteria(criteria: CodeQueryCriteria): Promise<Code[]> {
+    const urlParams = buildCodeURLParams(criteria);
+    return await fetchCodesfromAPI(urlParams);
+  }
+
   return {
     fetchTransactionsfromAPIWithCriteria,
     fetchBlocksfromAPIWithCriteria,
     fetchBalancesfromAPIWithCriteria,
+    fetchCodesfromAPIWithCriteria,
   };
 };
 const fetchTransactionsfromAPI = async (urlParams: string): Promise<Transaction[]> => {
