@@ -91,22 +91,12 @@ function BlockListContent({ activeTab, onSelect }: {
               <th className="p-2 border sticky top-0 bg-gray-100">Block Number</th>
               <th className="p-2 border sticky top-0 bg-gray-100">Block Hash</th>
               <th className="p-2 border sticky top-0 bg-gray-100">Parent Hash</th>
-              <th className="p-2 border sticky top-0 bg-gray-100">Ommers Hash</th>
-              <th className="p-2 border sticky top-0 bg-gray-100">Beneficiary</th>
-              <th className="p-2 border sticky top-0 bg-gray-100">State Root</th>
-              <th className="p-2 border sticky top-0 bg-gray-100">Transactions Root</th>
-              <th className="p-2 border sticky top-0 bg-gray-100">Receipts Root</th>
-              <th className="p-2 border sticky top-0 bg-gray-100">Logs Bloom</th>
-              <th className="p-2 border sticky top-0 bg-gray-100">Difficulty</th>
-              <th className="p-2 border sticky top-0 bg-gray-100">Gas Limit</th>
+              <th className="p-2 border sticky top-0 bg-gray-100">Chain ID</th>
               <th className="p-2 border sticky top-0 bg-gray-100">Gas Used</th>
               <th className="p-2 border sticky top-0 bg-gray-100">Timestamp</th>
-              <th className="p-2 border sticky top-0 bg-gray-100">Extra Data</th>
-              <th className="p-2 border sticky top-0 bg-gray-100">Mix Hash</th>
-              <th className="p-2 border sticky top-0 bg-gray-100">Nonce</th>
-              <th className="p-2 border sticky top-0 bg-gray-100">Base Fee Per Gas</th>
-              <th className="p-2 border sticky top-0 bg-gray-100">Chain ID</th>
+              <th className="p-2 border sticky top-0 bg-gray-100">Beneficiary</th>
               <th className="p-2 border sticky top-0 bg-gray-100">Solana Slot</th>
+              <th className="p-2 border sticky top-0 bg-gray-100">Tx Count</th>
             </tr>
           </thead>
           <tbody>
@@ -117,41 +107,35 @@ function BlockListContent({ activeTab, onSelect }: {
                     <a href={`/block/${blk.block_number}`} className="text-blue-600 underline hover:text-blue-800">{blk.block_number}</a>
                   ) : ''}
                 </td>
-              <td className="p-2 border">
-                {blk.block_hash ? (
-                  <a href={`/block/${blk.block_hash}`} className="text-blue-600 underline hover:text-blue-800">{blk.block_hash}</a>
-                ) : ''}
-              </td>
-              <td className="p-2 border">{blk.parent_hash}</td>
-              <td className="p-2 border">{blk.ommers_hash}</td>
-              <td className="p-2 border">{blk.beneficiary}</td>
-              <td className="p-2 border">{blk.state_root}</td>
-              <td className="p-2 border">{blk.transactions_root}</td>
-              <td className="p-2 border">{blk.receipts_root}</td>
-              <td className="p-2 border">{blk.logs_bloom}</td>
-              <td className="p-2 border">{blk.difficulty}</td>
-              <td className="p-2 border">{blk.gas_limit}</td>
-              <td className="p-2 border">{blk.gas_used}</td>
-              <td className="p-2 border">{blk.timestamp}</td>
-              <td className="p-2 border">{blk.extra_data}</td>
-              <td className="p-2 border">{blk.mix_hash}</td>
-              <td className="p-2 border">{blk.nonce}</td>
-              <td className="p-2 border">{blk.base_fee_per_gas}</td>
-              <td className="p-2 border">{blk.chain_id}</td>
-              <td className="p-2 border">
-                {blk.solana_slot ? (
-                  <a
-                  href={`${solscanBase}/block/${blk.solana_slot}?cluster=${solscanCluster}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-600 underline hover:text-blue-800"
-                  >
-                  {blk.solana_slot}
-                  </a>
-                ) : ''}
-              </td>
-            </tr>
-          ))}
+                <td className="p-2 border">
+                  {blk.block_hash ? (
+                    <a href={`/block/${blk.block_hash}`} className="text-blue-600 underline hover:text-blue-800">{blk.block_hash}</a>
+                  ) : ''}
+                </td>
+                <td className="p-2 border">
+                  {blk.parent_hash ? (
+                    <a href={`/block/${blk.parent_hash}`} className="text-blue-600 underline hover:text-blue-800">{blk.parent_hash}</a>
+                  ) : ''}
+                </td>
+                <td className="p-2 border">{blk.chain_id}</td>
+                <td className="p-2 border">{blk.gas_used}</td>
+                <td className="p-2 border">{blk.timestamp ? new Date(blk.timestamp * 1000).toLocaleString() : ''}</td>
+                <td className="p-2 border">{blk.beneficiary}</td>
+                <td className="p-2 border">
+                  {blk.solana_slot ? (
+                    <a
+                      href={`${solscanBase}/block/${blk.solana_slot}?cluster=${solscanCluster}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-600 underline hover:text-blue-800"
+                    >
+                      {blk.solana_slot}
+                    </a>
+                  ) : ''}
+                </td>
+                <td className="p-2 border">{blk.tx_count ?? 0}</td>
+              </tr>
+            ))}
         </tbody>
       </table>
       </div>
@@ -224,52 +208,104 @@ export function BlockDetails({ hashorHeight }: { hashorHeight: string }) {
   if (loading) return <div>Loading block...</div>;
   if (error) return <div className="text-red-500">{error}</div>;
   if (!block) return <div>No block found.</div>;
-  const formatKey = (key: string) => key.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
-  const formatValue = (key: string, value: any) => {
-    if (key === 'timestamp' && typeof value === 'number') {
-      const date = new Date(value * 1000);
-      return `${value} (${date.toLocaleString()})`;
-    }
-    return String(value);
+
+  const formatTimestamp = (timestamp: number) => {
+    const date = new Date(timestamp * 1000);
+    return `${timestamp} (${date.toLocaleString()})`;
   };
+
   return (
     <div className="flex flex-col gap-2">
-  {Object.entries(block).map(([key, value]) => {
-    const isSolanaSlot = key === "solana_slot";
+      {/* Chain ID */}
+      <div className="flex justify-between gap-4 text-sm border-b border-gray-200 py-1">
+        <span className="font-semibold">Chain ID</span>
+        <span className="font-mono break-all text-right">{block.chain_id}</span>
+      </div>
 
-    console.log("Key:", key, "Value:", value, "isSolanaSlot:", isSolanaSlot);
+      {/* Block Number */}
+      <div className="flex justify-between gap-4 text-sm border-b border-gray-200 py-1">
+        <span className="font-semibold">Block Number</span>
+        <span className="font-mono break-all text-right">{block.block_number}</span>
+      </div>
 
- 
-    const solscanHref =
-      isSolanaSlot && value
-        ? `${solscanBase}/block/${value}?cluster=${solscanCluster}`
-        : null;
+      {/* Block Hash */}
+      {block.block_hash && (
+        <div className="flex justify-between gap-4 text-sm border-b border-gray-200 py-1">
+          <span className="font-semibold">Block Hash</span>
+          <span className="font-mono break-all text-right">
+            <a href={`/block/${block.block_hash}`} className="text-blue-600 hover:underline">
+              {block.block_hash}
+            </a>
+          </span>
+        </div>
+      )}
 
-        console.log("Solscan Href:", solscanHref);
-    return (
-      <div
-        key={key}
-        className="flex justify-between gap-4 text-sm border-b border-gray-200 py-1"
-      >
-        <span className="font-semibold">{formatKey(key)}</span>
+      {/* Parent Hash */}
+      {block.parent_hash && (
+        <div className="flex justify-between gap-4 text-sm border-b border-gray-200 py-1">
+          <span className="font-semibold">Parent Hash</span>
+          <span className="font-mono break-all text-right">
+            <a href={`/block/${block.parent_hash}`} className="text-blue-600 hover:underline">
+              {block.parent_hash}
+            </a>
+          </span>
+        </div>
+      )}
 
-        <span className="font-mono break-all text-right">
-          {isSolanaSlot && solscanHref ? (
+      {/* Gas Used */}
+      {block.gas_used && (
+        <div className="flex justify-between gap-4 text-sm border-b border-gray-200 py-1">
+          <span className="font-semibold">Gas Used</span>
+          <span className="font-mono break-all text-right">{block.gas_used}</span>
+        </div>
+      )}
+
+      {/* Timestamp */}
+      {block.timestamp && (
+        <div className="flex justify-between gap-4 text-sm border-b border-gray-200 py-1">
+          <span className="font-semibold">Timestamp</span>
+          <span className="font-mono break-all text-right">{formatTimestamp(block.timestamp)}</span>
+        </div>
+      )}
+
+      {/* Beneficiary */}
+      {block.beneficiary && (
+        <div className="flex justify-between gap-4 text-sm border-b border-gray-200 py-1">
+          <span className="font-semibold">Beneficiary</span>
+          <span className="font-mono break-all text-right">{block.beneficiary}</span>
+        </div>
+      )}
+
+      {/* Solana Slot */}
+      {block.solana_slot && (
+        <div className="flex justify-between gap-4 text-sm border-b border-gray-200 py-1">
+          <span className="font-semibold">Solana Slot</span>
+          <span className="font-mono break-all text-right">
             <a
-              href={solscanHref}
+              href={`${solscanBase}/block/${block.solana_slot}?cluster=${solscanCluster}`}
               target="_blank"
               rel="noopener noreferrer"
               className="text-blue-600 hover:underline"
             >
-              {formatValue(key, value)}
+              {block.solana_slot}
             </a>
-          ) : (
-            formatValue(key, value)
-          )}
-        </span>
+          </span>
+        </div>
+      )}
+
+      {/* Tx Count */}
+      <div className="flex justify-between gap-4 text-sm border-b border-gray-200 py-1">
+        <span className="font-semibold">Tx Count</span>
+        <span className="font-mono break-all text-right">{block.tx_count}</span>
       </div>
-    );
-  })}
-</div>
+
+      {/* Base Fee Per Gas (optional) */}
+      {block.base_fee_per_gas && (
+        <div className="flex justify-between gap-4 text-sm border-b border-gray-200 py-1">
+          <span className="font-semibold">Base Fee Per Gas</span>
+          <span className="font-mono break-all text-right">{block.base_fee_per_gas}</span>
+        </div>
+      )}
+    </div>
   );
 }

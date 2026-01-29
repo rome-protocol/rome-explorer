@@ -52,7 +52,7 @@ export default function BlockHashPage() {
           
           {activeTab === 'details' && <BlockDetails hashorHeight={hashOrHeight} />}
           {activeTab === 'transactions' && (
-            <BlockTransactionList blockNumber={blockNumber}  />
+            <BlockTransactionList blockNumber={blockNumber} blockHash={blockHash} />
           )}
         </div>
       </div>

@@ -4,6 +4,24 @@ import { useChainStore } from '@/store/chainStore';
 import { Balance } from '@/constants/balances';
 import { BalanceQueryCriteria } from '@/hooks/BalanceQueryCriteria';
 
+// Helper function to format balance
+function formatBalance(balance: string): string {
+  const balanceValue = balance.startsWith('0x') ? BigInt(balance) : BigInt(balance);
+  // Convert from wei to RSOL (divide by 10^18)
+  const divisor = BigInt('1000000000000000000'); // 10^18
+  const rsolValue = balanceValue / divisor;
+  const remainder = balanceValue % divisor;
+  
+  // If there's a remainder, show decimal places
+  if (remainder === BigInt(0)) {
+    return `${rsolValue} RSOL`;
+  } else {
+    // Calculate decimal part (up to 4 decimal places)
+    const decimalPart = (Number(remainder) / Number(divisor)).toFixed(4).substring(2).replace(/0+$/, '');
+    return `${rsolValue}.${decimalPart} RSOL`;
+  }
+}
+
 // Hook for fetching balances
 export const useMinedBalances = () => {
   const { fetchBalancesfromAPIWithCriteria } = useMinedTransactionAPI();
@@ -90,9 +108,7 @@ export function BalanceList() {
                   ) : ''}
                 </td>
                 <td className="p-2 border">
-                  {bal.balance && bal.balance.startsWith('0x')
-                    ? BigInt(bal.balance).toString()
-                    : bal.balance}
+                  {bal.balance ? formatBalance(bal.balance) : '-'}
                 </td>
                 <td className="p-2 border">{bal.chain_id}</td>
               </tr>
@@ -172,12 +188,30 @@ export function BalanceDetails({ address }: { address: string }) {
 
   return (
     <div className="flex flex-col gap-2">
-      {Object.entries(balance).map(([key, value]) => (
-        <div key={key} className="flex justify-between">
-          <span className="font-semibold">{key}</span>
-          <span>{String(value)}</span>
-        </div>
-      ))}
+      {/* Chain ID */}
+      <div className="flex justify-between gap-4 text-sm border-b border-gray-200 py-1">
+        <span className="font-semibold">Chain ID</span>
+        <span className="font-mono break-all text-right">{balance.chain_id}</span>
+      </div>
+
+      {/* Address */}
+      <div className="flex justify-between gap-4 text-sm border-b border-gray-200 py-1">
+        <span className="font-semibold">Address</span>
+        <span className="font-mono break-all text-right">
+          <a
+            href={`/balance/${balance.address}`}
+            className="text-blue-600 hover:underline"
+          >
+            {balance.address}
+          </a>
+        </span>
+      </div>
+
+      {/* Balance */}
+      <div className="flex justify-between gap-4 text-sm border-b border-gray-200 py-1">
+        <span className="font-semibold">Balance</span>
+        <span className="font-mono break-all text-right">{balance.balance ? formatBalance(balance.balance) : '-'}</span>
+      </div>
     </div>
   );
 }

@@ -112,7 +112,14 @@ export function CodeList() {
                     {code.is_contract ? 'Yes' : 'No'}
                   </span>
                 </td>
-                <td className="p-2 border">{code.block_number}</td>
+                <td className="p-2 border">
+                  <a
+                    href={`/block/${code.block_number}`}
+                    className="text-blue-600 underline hover:text-blue-800"
+                  >
+                    {code.block_number}
+                  </a>
+                </td>
               </tr>
             ))}
           </tbody>
@@ -189,70 +196,106 @@ export function CodeDetails({ address }: { address: string }) {
   if (!code) return <div>No code found.</div>;
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="flex flex-col gap-2">
-          <div className="flex justify-between">
-            <span className="font-semibold">Address:</span>
-            <span className="text-sm break-all">{code.address}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="font-semibold">Chain ID:</span>
-            <span>{code.chain_id}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="font-semibold">Kind:</span>
-            <span className={`px-2 py-1 rounded text-xs ${
-              code.kind === 'EOA' ? 'bg-gray-200' :
-              code.kind === 'ERC20' ? 'bg-blue-200' :
-              code.kind === 'ERC721' ? 'bg-purple-200' :
-              code.kind === 'ERC1155' ? 'bg-green-200' :
-              'bg-yellow-200'
-            }`}>
-              {code.kind}
-            </span>
-          </div>
-          <div className="flex justify-between">
-            <span className="font-semibold">Is Contract:</span>
-            <span className={`px-2 py-1 rounded text-xs ${
-              code.is_contract ? 'bg-green-200' : 'bg-gray-200'
-            }`}>
-              {code.is_contract ? 'Yes' : 'No'}
-            </span>
-          </div>
-        </div>
-        <div className="flex flex-col gap-2">
-          <div className="flex justify-between">
-            <span className="font-semibold">Name:</span>
-            <span>{code.name || '-'}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="font-semibold">Symbol:</span>
-            <span>{code.symbol || '-'}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="font-semibold">Decimals:</span>
-            <span>{code.decimals !== undefined ? code.decimals : '-'}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="font-semibold">Block Number:</span>
-            <span>{code.block_number}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="font-semibold">Updated At:</span>
-            <span>{new Date(code.updated_at_unix * 1000).toLocaleString()}</span>
-          </div>
-        </div>
+    <div className="flex flex-col gap-2">
+      {/* Chain ID */}
+      <div className="flex justify-between gap-4 text-sm border-b border-gray-200 py-1">
+        <span className="font-semibold">Chain ID</span>
+        <span className="font-mono break-all text-right">{code.chain_id}</span>
       </div>
-      
-      <div className="mt-4">
-        <div className="font-semibold mb-2">Contract Code:</div>
-        <div className="bg-gray-100 p-4 rounded overflow-x-auto">
-          <pre className="text-xs whitespace-pre-wrap break-all">
-            {code.code || 'No code available'}
-          </pre>
-        </div>
+
+      {/* Address */}
+      <div className="flex justify-between gap-4 text-sm border-b border-gray-200 py-1">
+        <span className="font-semibold">Address</span>
+        <span className="font-mono break-all text-right">
+          <a
+            href={`/code/${code.address}`}
+            className="text-blue-600 hover:underline"
+          >
+            {code.address}
+          </a>
+        </span>
       </div>
+
+      {/* Kind */}
+      <div className="flex justify-between gap-4 text-sm border-b border-gray-200 py-1">
+        <span className="font-semibold">Kind</span>
+        <span className="font-mono break-all text-right">
+          <span className={`px-2 py-1 rounded text-xs ${
+            code.kind === 'EOA' ? 'bg-gray-200' :
+            code.kind === 'ERC20' ? 'bg-blue-200' :
+            code.kind === 'ERC721' ? 'bg-purple-200' :
+            code.kind === 'ERC1155' ? 'bg-green-200' :
+            'bg-yellow-200'
+          }`}>
+            {code.kind}
+          </span>
+        </span>
+      </div>
+
+      {/* Is Contract */}
+      <div className="flex justify-between gap-4 text-sm border-b border-gray-200 py-1">
+        <span className="font-semibold">Is Contract</span>
+        <span className="font-mono break-all text-right">
+          <span className={`px-2 py-1 rounded text-xs ${
+            code.is_contract ? 'bg-green-200' : 'bg-gray-200'
+          }`}>
+            {code.is_contract ? 'Yes' : 'No'}
+          </span>
+        </span>
+      </div>
+
+      {/* Name */}
+      {code.name && (
+        <div className="flex justify-between gap-4 text-sm border-b border-gray-200 py-1">
+          <span className="font-semibold">Name</span>
+          <span className="font-mono break-all text-right">{code.name}</span>
+        </div>
+      )}
+
+      {/* Symbol */}
+      {code.symbol && (
+        <div className="flex justify-between gap-4 text-sm border-b border-gray-200 py-1">
+          <span className="font-semibold">Symbol</span>
+          <span className="font-mono break-all text-right">{code.symbol}</span>
+        </div>
+      )}
+
+      {/* Decimals */}
+      {code.decimals !== undefined && (
+        <div className="flex justify-between gap-4 text-sm border-b border-gray-200 py-1">
+          <span className="font-semibold">Decimals</span>
+          <span className="font-mono break-all text-right">{code.decimals}</span>
+        </div>
+      )}
+
+      {/* Block Number */}
+      <div className="flex justify-between gap-4 text-sm border-b border-gray-200 py-1">
+        <span className="font-semibold">Block Number</span>
+        <span className="font-mono break-all text-right">
+          <a
+            href={`/block/${code.block_number}`}
+            className="text-blue-600 hover:underline"
+          >
+            {code.block_number}
+          </a>
+        </span>
+      </div>
+
+      {/* Updated At */}
+      <div className="flex justify-between gap-4 text-sm border-b border-gray-200 py-1">
+        <span className="font-semibold">Updated At</span>
+        <span className="font-mono break-all text-right">{new Date(code.updated_at_unix * 1000).toLocaleString()}</span>
+      </div>
+
+      {/* Contract Code */}
+      {code.code && (
+        <div className="flex flex-col gap-2 mt-4">
+          <h3 className="font-semibold text-lg">Contract Code</h3>
+          <div className="border rounded p-3 bg-gray-50 max-w-full overflow-x-auto">
+            <pre className="text-sm break-all whitespace-pre-wrap font-mono">{code.code}</pre>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
