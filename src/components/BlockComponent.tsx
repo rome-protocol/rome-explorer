@@ -38,6 +38,8 @@ function BlockListContent({ activeTab, onSelect }: {
   onSelect: (block: Block) => void;
 }) {
   const [atBottom, setAtBottom] = useState(false);
+  const [currentPage, setCurrentPage] = useState<number>(0);
+  const [hasMore, setHasMore] = useState<boolean>(true);
   const activeConfig = { label: 'All', useHook: useMinedBlocks, emptyStateMessage: 'No blocks available for the selected chain' };
   const { chainId } = useChainStore();
   const { fetchBlocksfromAPIWithCriteria } = activeConfig.useHook();
@@ -46,13 +48,16 @@ function BlockListContent({ activeTab, onSelect }: {
     if (fetchBlocksfromAPIWithCriteria) {
       const criteria: BlockQueryCriteria = {
         filter: { chain_id: chainId },
-        identifier: { latest: true },
+        identifier: { latest: true, page_idx: currentPage },
         limit: { limit: 25 },
       };
-      fetchBlocksfromAPIWithCriteria(criteria).then((txs) => { setApiBlocks(txs); });
+      fetchBlocksfromAPIWithCriteria(criteria).then((txs) => {
+        setApiBlocks(txs);
+        setHasMore(txs.length === 25);
+      });
     }
   }
-  useEffect(() => { fetchData(); }, [chainId]);
+  useEffect(() => { fetchData(); }, [chainId, currentPage]);
   const handleScroll = useCallback((e: Event) => {
     const el = e.currentTarget as HTMLElement;
     const { scrollTop, scrollHeight, clientHeight } = el;
@@ -64,40 +69,54 @@ function BlockListContent({ activeTab, onSelect }: {
   if (apiBlocks.length === 0) {
     return (<div className="text-center py-4 text-gray-500">{activeConfig.emptyStateMessage}</div>);
   }
+
+  const handlePreviousPage = () => {
+    if (currentPage > 0) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  const handleNextPage = () => {
+    if (hasMore) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
   return (
-    <div ref={setBoxRef} className="max-h-[60vh] overflow-y-auto">
-      <table className="w-full text-sm border rounded-lg shadow bg-white">
-        <thead>
-          <tr>
-            <th className="p-2 border sticky top-0 bg-gray-100">Block Number</th>
-            <th className="p-2 border sticky top-0 bg-gray-100">Block Hash</th>
-            <th className="p-2 border sticky top-0 bg-gray-100">Parent Hash</th>
-            <th className="p-2 border sticky top-0 bg-gray-100">Ommers Hash</th>
-            <th className="p-2 border sticky top-0 bg-gray-100">Beneficiary</th>
-            <th className="p-2 border sticky top-0 bg-gray-100">State Root</th>
-            <th className="p-2 border sticky top-0 bg-gray-100">Transactions Root</th>
-            <th className="p-2 border sticky top-0 bg-gray-100">Receipts Root</th>
-            <th className="p-2 border sticky top-0 bg-gray-100">Logs Bloom</th>
-            <th className="p-2 border sticky top-0 bg-gray-100">Difficulty</th>
-            <th className="p-2 border sticky top-0 bg-gray-100">Gas Limit</th>
-            <th className="p-2 border sticky top-0 bg-gray-100">Gas Used</th>
-            <th className="p-2 border sticky top-0 bg-gray-100">Timestamp</th>
-            <th className="p-2 border sticky top-0 bg-gray-100">Extra Data</th>
-            <th className="p-2 border sticky top-0 bg-gray-100">Mix Hash</th>
-            <th className="p-2 border sticky top-0 bg-gray-100">Nonce</th>
-            <th className="p-2 border sticky top-0 bg-gray-100">Base Fee Per Gas</th>
-            <th className="p-2 border sticky top-0 bg-gray-100">Chain ID</th>
-            <th className="p-2 border sticky top-0 bg-gray-100">Solana Slot</th>
-          </tr>
-        </thead>
-        <tbody>
-          {apiBlocks.map((blk) => (
-            <tr key={blk.block_number} className="border-b hover:bg-gray-50 cursor-pointer">
-              <td className="p-2 border">
-                {blk.block_number ? (
-                  <a href={`/block/${blk.block_number}`} className="text-blue-600 underline hover:text-blue-800">{blk.block_number}</a>
-                ) : ''}
-              </td>
+    <div className="flex flex-col gap-4">
+      <div ref={setBoxRef} className="max-h-[60vh] overflow-y-auto">
+        <table className="w-full text-sm border rounded-lg shadow bg-white">
+          <thead>
+            <tr>
+              <th className="p-2 border sticky top-0 bg-gray-100">Block Number</th>
+              <th className="p-2 border sticky top-0 bg-gray-100">Block Hash</th>
+              <th className="p-2 border sticky top-0 bg-gray-100">Parent Hash</th>
+              <th className="p-2 border sticky top-0 bg-gray-100">Ommers Hash</th>
+              <th className="p-2 border sticky top-0 bg-gray-100">Beneficiary</th>
+              <th className="p-2 border sticky top-0 bg-gray-100">State Root</th>
+              <th className="p-2 border sticky top-0 bg-gray-100">Transactions Root</th>
+              <th className="p-2 border sticky top-0 bg-gray-100">Receipts Root</th>
+              <th className="p-2 border sticky top-0 bg-gray-100">Logs Bloom</th>
+              <th className="p-2 border sticky top-0 bg-gray-100">Difficulty</th>
+              <th className="p-2 border sticky top-0 bg-gray-100">Gas Limit</th>
+              <th className="p-2 border sticky top-0 bg-gray-100">Gas Used</th>
+              <th className="p-2 border sticky top-0 bg-gray-100">Timestamp</th>
+              <th className="p-2 border sticky top-0 bg-gray-100">Extra Data</th>
+              <th className="p-2 border sticky top-0 bg-gray-100">Mix Hash</th>
+              <th className="p-2 border sticky top-0 bg-gray-100">Nonce</th>
+              <th className="p-2 border sticky top-0 bg-gray-100">Base Fee Per Gas</th>
+              <th className="p-2 border sticky top-0 bg-gray-100">Chain ID</th>
+              <th className="p-2 border sticky top-0 bg-gray-100">Solana Slot</th>
+            </tr>
+          </thead>
+          <tbody>
+            {apiBlocks.map((blk) => (
+              <tr key={blk.block_number} className="border-b hover:bg-gray-50 cursor-pointer">
+                <td className="p-2 border">
+                  {blk.block_number ? (
+                    <a href={`/block/${blk.block_number}`} className="text-blue-600 underline hover:text-blue-800">{blk.block_number}</a>
+                  ) : ''}
+                </td>
               <td className="p-2 border">
                 {blk.block_hash ? (
                   <a href={`/block/${blk.block_hash}`} className="text-blue-600 underline hover:text-blue-800">{blk.block_hash}</a>
@@ -135,6 +154,38 @@ function BlockListContent({ activeTab, onSelect }: {
           ))}
         </tbody>
       </table>
+      </div>
+
+      {/* Pagination Controls */}
+      <div className="flex items-center justify-start gap-4 border-t pt-4">
+        <button
+          onClick={handlePreviousPage}
+          disabled={currentPage === 0}
+          className={`px-4 py-2 rounded-lg border ${
+            currentPage === 0
+              ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+              : 'bg-white text-gray-700 hover:bg-gray-50 cursor-pointer'
+          }`}
+        >
+          Previous
+        </button>
+
+        <span className="text-sm text-gray-600 px-4">
+          Page {currentPage + 1}
+        </span>
+
+        <button
+          onClick={handleNextPage}
+          disabled={!hasMore}
+          className={`px-4 py-2 rounded-lg border ${
+            !hasMore
+              ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+              : 'bg-white text-gray-700 hover:bg-gray-50 cursor-pointer'
+          }`}
+        >
+          Next
+        </button>
+      </div>
     </div>
   );
 }

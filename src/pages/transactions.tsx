@@ -27,7 +27,7 @@ export default function TransactionsPage() {
       <div className="flex flex-col gap-6 w-full">
         {!currentTxn && (
           <div className="border border-gray p-8 rounded-2xl text-black bg-white flex flex-col gap-4 w-full">
-            <h1 className="text-base mb-4">Transactions</h1>
+            <h1 className="text-base">Transactions</h1>
 
             <TransactionList onSelect={(txn) => setCurrentTxn(txn)} />
           </div>

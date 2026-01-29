@@ -42,6 +42,8 @@ function TransactionListContent({ activeTab, onSelect, searchQuery }: {
   searchQuery: string;
 }) {
   const [atBottom, setAtBottom] = useState(false);
+  const [currentPage, setCurrentPage] = useState<number>(0);
+  const [hasMore, setHasMore] = useState<boolean>(true);
   const activeConfig = {
     mined: { label: 'Mined', useHook: useMinedTransactions, emptyStateMessage: 'No transactions available for the selected chain' },
   }[activeTab];
@@ -53,14 +55,17 @@ function TransactionListContent({ activeTab, onSelect, searchQuery }: {
       const criteria: TxQueryCriteria = {
         filter: { chain_id: chainId },
         parts: { all: true },
-        identifier: { latest: true },
+        identifier: { latest: true, page_idx: currentPage },
         limit: { limit: 25 },
         tx_type: { tx_type: 'all' },
       };
-      fetchTransactionsfromAPIWithCriteria(criteria).then((txs) => { setApiTransactions(txs); });
+      fetchTransactionsfromAPIWithCriteria(criteria).then((txs) => {
+        setApiTransactions(txs);
+        setHasMore(txs.length === 25);
+      });
     }
   }
-  useEffect(() => { fetchData(); }, [chainId]);
+  useEffect(() => { fetchData(); }, [chainId, currentPage]);
   const handleScroll = useCallback((e: Event) => {
     const el = e.currentTarget as HTMLElement;
     const { scrollTop, scrollHeight, clientHeight } = el;
@@ -72,32 +77,46 @@ function TransactionListContent({ activeTab, onSelect, searchQuery }: {
   if (apiTransactions.length === 0) {
     return (<div className="text-center py-4 text-gray-500">{activeConfig.emptyStateMessage}</div>);
   }
+
+  const handlePreviousPage = () => {
+    if (currentPage > 0) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  const handleNextPage = () => {
+    if (hasMore) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
   return (
-    <div ref={setBoxRef} className="max-h-[60vh] overflow-y-auto">
-      <table className="w-full text-sm border rounded-lg shadow bg-white">
-        <thead>
-          <tr>
-            <th className="p-2 border sticky top-0 bg-gray-100">Hash</th>
-            <th className="p-2 border sticky top-0 bg-gray-100">Nonce</th>
-            <th className="p-2 border sticky top-0 bg-gray-100">Block Number</th>
-            <th className="p-2 border sticky top-0 bg-gray-100">Type</th>
-            <th className="p-2 border sticky top-0 bg-gray-100">From</th>
-            <th className="p-2 border sticky top-0 bg-gray-100">To</th>
-            <th className="p-2 border sticky top-0 bg-gray-100">Block Hash</th>
-            <th className="p-2 border sticky top-0 bg-gray-100">Value</th>
-            <th className="p-2 border sticky top-0 bg-gray-100">Gas</th>
-            <th className="p-2 border sticky top-0 bg-gray-100">Gas Price</th>
-            <th className="p-2 border sticky top-0 bg-gray-100">Max Priority Fee</th>
-            <th className="p-2 border sticky top-0 bg-gray-100">Max Fee</th>
-            <th className="p-2 border sticky top-0 bg-gray-100">Solana Slot Number</th>
-          </tr>
-        </thead>
-        <tbody>
-          {apiTransactions.map((tx) => (
-            <tr key={tx.transactionHash} className="border-b hover:bg-gray-50 cursor-pointer">
-              <td className="p-2 border">
-                {tx.transactionHash ? (
-                  <a href={`/transaction/${tx.transactionHash}`} className="text-blue-600 underline hover:text-blue-800">{tx.transactionHash}</a>
+    <div className="flex flex-col gap-4">
+      <div ref={setBoxRef} className="max-h-[60vh] overflow-y-auto">
+        <table className="w-full text-sm border rounded-lg shadow bg-white">
+          <thead>
+            <tr>
+              <th className="p-2 border sticky top-0 bg-gray-100">Hash</th>
+              <th className="p-2 border sticky top-0 bg-gray-100">Nonce</th>
+              <th className="p-2 border sticky top-0 bg-gray-100">Block Number</th>
+              <th className="p-2 border sticky top-0 bg-gray-100">Type</th>
+              <th className="p-2 border sticky top-0 bg-gray-100">From</th>
+              <th className="p-2 border sticky top-0 bg-gray-100">To</th>
+              <th className="p-2 border sticky top-0 bg-gray-100">Block Hash</th>
+              <th className="p-2 border sticky top-0 bg-gray-100">Value</th>
+              <th className="p-2 border sticky top-0 bg-gray-100">Gas</th>
+              <th className="p-2 border sticky top-0 bg-gray-100">Gas Price</th>
+              <th className="p-2 border sticky top-0 bg-gray-100">Max Priority Fee</th>
+              <th className="p-2 border sticky top-0 bg-gray-100">Max Fee</th>
+              <th className="p-2 border sticky top-0 bg-gray-100">Solana Slot Number</th>
+            </tr>
+          </thead>
+          <tbody>
+            {apiTransactions.map((tx) => (
+              <tr key={tx.transactionHash} className="border-b hover:bg-gray-50 cursor-pointer">
+                <td className="p-2 border">
+                  {tx.transactionHash ? (
+                    <a href={`/transaction/${tx.transactionHash}`} className="text-blue-600 underline hover:text-blue-800">{tx.transactionHash}</a>
                 ) : ''}
               </td>
               <td className="p-2 border">{tx.transactionNonce ?? ''}</td>
@@ -126,6 +145,38 @@ function TransactionListContent({ activeTab, onSelect, searchQuery }: {
           ))}
         </tbody>
       </table>
+      </div>
+
+      {/* Pagination Controls */}
+      <div className="flex items-center justify-start gap-4 border-t pt-4">
+        <button
+          onClick={handlePreviousPage}
+          disabled={currentPage === 0}
+          className={`px-4 py-2 rounded-lg border ${
+            currentPage === 0
+              ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+              : 'bg-white text-gray-700 hover:bg-gray-50 cursor-pointer'
+          }`}
+        >
+          Previous
+        </button>
+
+        <span className="text-sm text-gray-600 px-4">
+          Page {currentPage + 1}
+        </span>
+
+        <button
+          onClick={handleNextPage}
+          disabled={!hasMore}
+          className={`px-4 py-2 rounded-lg border ${
+            !hasMore
+              ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+              : 'bg-white text-gray-700 hover:bg-gray-50 cursor-pointer'
+          }`}
+        >
+          Next
+        </button>
+      </div>
     </div>
   );
 }

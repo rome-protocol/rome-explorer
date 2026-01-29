@@ -27,7 +27,7 @@ export default function BlocksPage() {
       <div className="flex flex-col gap-6 w-full">
         {!currentBlk && (
           <div className="border border-gray p-8 rounded-2xl text-black bg-white flex flex-col gap-4 w-full">
-            <h1 className="text-base mb-4">Blocks</h1>
+            <h1 className="text-base">Blocks</h1>
 
             <BlockList onSelect={(blk) => setCurrentBlk(blk)} />
           </div>

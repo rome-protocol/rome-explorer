@@ -27,7 +27,7 @@ export default function CodesPage() {
       <div className="flex flex-col gap-6 w-full">
         {!currentCode && (
           <div className="border border-gray p-8 rounded-2xl text-black bg-white flex flex-col gap-4 w-full">
-            <h1 className="text-base mb-4">Codes</h1>
+            <h1 className="text-base">Codes</h1>
 
             <CodeList />
           </div>

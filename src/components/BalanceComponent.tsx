@@ -19,6 +19,8 @@ export function BalanceList() {
   const [balances, setBalances] = useState<Balance[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState<number>(0);
+  const [hasMore, setHasMore] = useState<boolean>(true);
 
   useEffect(() => {
     if (!chainId) {
@@ -31,55 +33,104 @@ export function BalanceList() {
     setError(null);
     const criteria: BalanceQueryCriteria = {
       filter: { chain_id: chainId },
-      identifier: { latest: true },
+      identifier: { latest: true, page_idx: currentPage },
       limit: { limit: 25 },
     };
     fetchBalancesfromAPIWithCriteria(criteria)
-      .then((balances) => setBalances(balances))
+      .then((balances) => {
+        setBalances(balances);
+        setHasMore(balances.length === 25);
+      })
       .catch(() => {
         setError('Failed to load balances');
         setBalances([]);
+        setHasMore(false);
       })
       .finally(() => setLoading(false));
-  }, [chainId ]);
+  }, [chainId, currentPage]);
 
   if (loading) return <div>Loading balances...</div>;
   if (error) return <div className="text-red-500">{error}</div>;
   if (!balances.length) return <div>No balances found.</div>;
 
+  const handlePreviousPage = () => {
+    if (currentPage > 0) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  const handleNextPage = () => {
+    if (hasMore) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
   return (
-    <div className="max-h-[60vh] overflow-y-auto">
-      <table className="w-full text-sm border rounded-lg shadow bg-white">
-        <thead>
-          <tr>
-            <th className="p-2 border sticky top-0 bg-gray-100">Address</th>
-            <th className="p-2 border sticky top-0 bg-gray-100">Balance</th>
-            <th className="p-2 border sticky top-0 bg-gray-100">Chain ID</th>
-          </tr>
-        </thead>
-        <tbody>
-          {balances.map((bal) => (
-            <tr key={bal.address} className="border-b hover:bg-gray-50 cursor-pointer">
-              <td className="p-2 border">
-                {bal.address ? (
-                  <a
-                    href={`/balance/${bal.address}`}
-                    className="text-blue-600 underline hover:text-blue-800"
-                  >
-                    {bal.address}
-                  </a>
-                ) : ''}
-              </td>
-              <td className="p-2 border">
-                {bal.balance && bal.balance.startsWith('0x')
-                  ? BigInt(bal.balance).toString()
-                  : bal.balance}
-              </td>
-              <td className="p-2 border">{bal.chain_id}</td>
+    <div className="flex flex-col gap-4">
+      <div className="max-h-[60vh] overflow-y-auto">
+        <table className="w-full text-sm border rounded-lg shadow bg-white">
+          <thead>
+            <tr>
+              <th className="p-2 border sticky top-0 bg-gray-100">Address</th>
+              <th className="p-2 border sticky top-0 bg-gray-100">Balance</th>
+              <th className="p-2 border sticky top-0 bg-gray-100">Chain ID</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {balances.map((bal) => (
+              <tr key={bal.address} className="border-b hover:bg-gray-50 cursor-pointer">
+                <td className="p-2 border">
+                  {bal.address ? (
+                    <a
+                      href={`/balance/${bal.address}`}
+                      className="text-blue-600 underline hover:text-blue-800"
+                    >
+                      {bal.address}
+                    </a>
+                  ) : ''}
+                </td>
+                <td className="p-2 border">
+                  {bal.balance && bal.balance.startsWith('0x')
+                    ? BigInt(bal.balance).toString()
+                    : bal.balance}
+                </td>
+                <td className="p-2 border">{bal.chain_id}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Pagination Controls */}
+      <div className="flex items-center justify-start gap-4 border-t pt-4">
+        <button
+          onClick={handlePreviousPage}
+          disabled={currentPage === 0}
+          className={`px-4 py-2 rounded-lg border ${
+            currentPage === 0
+              ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+              : 'bg-white text-gray-700 hover:bg-gray-50 cursor-pointer'
+          }`}
+        >
+          Previous
+        </button>
+
+        <span className="text-sm text-gray-600 px-4">
+          Page {currentPage + 1}
+        </span>
+
+        <button
+          onClick={handleNextPage}
+          disabled={!hasMore}
+          className={`px-4 py-2 rounded-lg border ${
+            !hasMore
+              ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+              : 'bg-white text-gray-700 hover:bg-gray-50 cursor-pointer'
+          }`}
+        >
+          Next
+        </button>
+      </div>
     </div>
   );
 }
